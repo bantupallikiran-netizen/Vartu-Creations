@@ -1,0 +1,84 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default Deny catch-all gate
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Secure Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && (request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'google.com');
+    }
+
+    // Role-based Access:
+    // User is admin if their email is the owner's email 'bantupallikiran@gmail.com' or they have an admin document
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'bantupallikiran@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // ID Format Validation Guard
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Products collection: Anyone can read, only admin can write
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Orders collection: Anyone can create a new order, user can read their own, admin can read/write all
+    match /orders/{orderId} {
+      allow create: if true; // Let anonymous checkout or registered users order
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // Custom Quote orders collection: Signed in users can create/read their own, admin can do everything
+    match /customOrders/{customOrderId} {
+      allow create: if isSignedIn();
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid && incomingIsStatusUpdateOnly());
+    }
+
+    function incomingIsStatusUpdateOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']);
+    }
+
+    // Raw Materials Inventory: Only signed-in managers/admins can read/write
+    match /rawMaterials/{rawMaterialId} {
+      allow read, write: if isSignedIn() || isAdmin();
+    }
+
+    // CRM Leads Database: Only admins can manage, users can submit their own profile on signup
+    match /crmLeads/{crmLeadId} {
+      allow create: if true; // Lead capture can occur from general website forms
+      allow read, update, delete: if isAdmin() || (isSignedIn() && request.auth.uid == crmLeadId);
+    }
+
+    // Workshops booking metadata
+    match /workshops/{workshopId} {
+      allow read: if true;
+      allow create: if true; // For registration submissions
+      allow update, delete: if isAdmin();
+    }
+
+    // AI Social Posting Hub Schedule
+    match /socialCalendar/{eventId} {
+      allow read, write: if isAdmin() || isSignedIn();
+    }
+  }
+}

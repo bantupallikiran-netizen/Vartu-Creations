@@ -1,0 +1,159 @@
+{
+  "entities": {
+    "product": {
+      "title": "Product",
+      "description": "Handmade products for VartU Creations store",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique product ID" },
+        "name": { "type": "string", "description": "Product title" },
+        "sku": { "type": "string", "description": "Stock keeping unit identifier" },
+        "category": { "type": "string", "description": "Resin Art, Jewellery, Home Décor, Candles, Festive Collection, Personalized Gifts, Crochet Products" },
+        "price": { "type": "number", "description": "Price in INR" },
+        "discount": { "type": "number", "description": "Discount percentage" },
+        "images": { "type": "array", "description": "Product image URLs or base64 data" },
+        "video": { "type": "string", "description": "Optional video URL or mock" },
+        "stock": { "type": "number", "description": "Available items in inventory" },
+        "weight": { "type": "number", "description": "Item weight in grams" },
+        "description": { "type": "string", "description": "Detailed craft description" },
+        "materials": { "type": "array", "description": "Raw materials list used" },
+        "customization": { "type": "boolean", "description": "Is product customizable by customers?" },
+        "reviews": { "type": "array", "description": "Customer reviews and star ratings" }
+      },
+      "required": ["id", "name", "sku", "category", "price", "stock", "description"]
+    },
+    "order": {
+      "title": "Order",
+      "description": "Customer transactions and delivery states",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "items": { "type": "array" },
+        "total": { "type": "number" },
+        "discountCode": { "type": "string" },
+        "giftWrap": { "type": "boolean" },
+        "shippingCharges": { "type": "number" },
+        "status": { "type": "string", "enum": ["New", "Confirmed", "In Production", "Packed", "Shipped", "Delivered", "Cancelled"] },
+        "orderNotes": { "type": "string" },
+        "customerDetails": { "type": "object" },
+        "paymentStatus": { "type": "string", "enum": ["Pending", "Paid", "Failed"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "items", "total", "status", "customerDetails", "paymentStatus"]
+    },
+    "customOrder": {
+      "title": "CustomOrder",
+      "description": "Personalized customization quote request submissions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "productType": { "type": "string" },
+        "customizationDetails": { "type": "string" },
+        "quantity": { "type": "number" },
+        "inspirationImage": { "type": "string" },
+        "status": { "type": "string", "enum": ["Requested", "Approved", "Rejected", "Completed"] },
+        "quotedPrice": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "productType", "customizationDetails", "quantity", "status"]
+    },
+    "rawMaterial": {
+      "title": "RawMaterial",
+      "description": "Inventory element of materials needed to construct artisan crafts",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "stockCount": { "type": "number" },
+        "unit": { "type": "string" },
+        "lowStockThreshold": { "type": "number" },
+        "lastReplenished": { "type": "string" }
+      },
+      "required": ["id", "name", "category", "stockCount", "unit", "lowStockThreshold"]
+    },
+    "crmLead": {
+      "title": "CRMLead",
+      "description": "Client profile storing purchasing behaviors, anniversaries, and lead sources",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "birthday": { "type": "string" },
+        "anniversary": { "type": "string" },
+        "leadSource": { "type": "string", "enum": ["Instagram", "Facebook", "WhatsApp", "Expo", "Website"] },
+        "purchaseCount": { "type": "number" },
+        "totalSpent": { "type": "number" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "email", "phone", "leadSource"]
+    },
+    "workshop": {
+      "title": "Workshop",
+      "description": "Interactive craft sessions offered by Dharani and Lokeswari",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string" },
+        "price": { "type": "number" },
+        "attendees": { "type": "array" }
+      },
+      "required": ["id", "title", "description", "date", "price"]
+    },
+    "socialCalendarEvent": {
+      "title": "SocialCalendarEvent",
+      "description": "AI assisted content item for scheduling social promotions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "channel": { "type": "string" },
+        "theme": { "type": "string" },
+        "caption": { "type": "string" },
+        "hashtags": { "type": "string" },
+        "reelIdea": { "type": "string" },
+        "status": { "type": "string", "enum": ["Planned", "Posted"] }
+      },
+      "required": ["id", "date", "channel", "theme", "status"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "product",
+      "description": "Single craft product card"
+    },
+    "/orders/{orderId}": {
+      "schema": "order",
+      "description": "Individual order file"
+    },
+    "/customOrders/{customOrderId}": {
+      "schema": "customOrder",
+      "description": "A customized quote requisition"
+    },
+    "/rawMaterials/{rawMaterialId}": {
+      "schema": "rawMaterial",
+      "description": "Artisan craft raw material"
+    },
+    "/crmLeads/{crmLeadId}": {
+      "schema": "crmLead",
+      "description": "Customer Profile data for CRM and target campaigns"
+    },
+    "/workshops/{workshopId}": {
+      "schema": "workshop",
+      "description": "Durable workshop event schedule with user registry"
+    },
+    "/socialCalendar/{eventId}": {
+      "schema": "socialCalendarEvent",
+      "description": "Content schedule calendar entries"
+    }
+  }
+}

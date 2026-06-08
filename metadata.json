@@ -1,0 +1,6 @@
+{
+  "name": "VartU Creations",
+  "description": "Premium boutique E-commerce Platform, Order CRM, Handcrafted Inventory Tracker, and AI-Powered Social Content Hub for VartU Creations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
